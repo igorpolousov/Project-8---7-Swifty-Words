@@ -7,15 +7,17 @@
 
 import UIKit
 
+// Усли вы делаете интерфейс полностью при помощи кода, нужно полностью делать пометки что к чему относится чтобы в дальнейшем было понятно где какой элемент расположен на экране
+
 class ViewController: UIViewController {
 
-    var cluesLabel: UILabel!
-    var answersLabel: UILabel!
-    var currentUnswer: UITextField!
-    var scoreLabel: UILabel!
-    var letterButtons = [UIButton]()
+    var cluesLabel: UILabel!          // Label с подсказками слева сверху
+    var answersLabel: UILabel!        // Label с введенными ответами пользователя справа сверху
+    var currentUnswer: UITextField!   // Text Field с предполагаемыми ответами пользователя середина
+    var scoreLabel: UILabel!          // Label с очками, правый верхний угол
+    var letterButtons = [UIButton]()  // Массив кнопок в котором расположены кнопки с частями слов
     
-    var activatedButtons = [UIButton]()
+    var activatedButtons = [UIButton]() // Кнопки которые уже нажал пользователь при вводе слова
     var solutions = [String]()
     
     var score = 0 {
@@ -48,8 +50,8 @@ class ViewController: UIViewController {
         answersLabel.font = UIFont.systemFont(ofSize: 24)
         answersLabel.numberOfLines = 0
         answersLabel.setContentHuggingPriority(UILayoutPriority(1), for: .vertical)
-//        answersLabel.layer.borderWidth = 1
-//        answersLabel.layer.borderColor = UIColor.lightGray.cgColor
+        //       answersLabel.layer.borderWidth = 2
+        //       answersLabel.layer.borderColor = UIColor.red.cgColor
         view.addSubview(answersLabel)
         
         // Adding cluesLabel to view
@@ -171,27 +173,30 @@ class ViewController: UIViewController {
     }
     
     @objc func letterTapped(_ sender: UIButton) {
-        guard let buttonTtitle = sender.titleLabel?.text else { return }
+        guard let buttonTitle = sender.titleLabel?.text else { return }
         
-        currentUnswer.text = currentUnswer.text?.appending(buttonTtitle)
+        currentUnswer.text = currentUnswer.text?.appending(buttonTitle)
         activatedButtons.append(sender)
         sender.isHidden = true
         
     }
 
     @objc func submitTapped(_ sender: UIButton) {
-        guard let answerText = currentUnswer.text else { return }
         
+        // Проверка что в поле с тектом currentAnswer введен какой-то текст, тогда переменная answerText будет иметь значение строки с введенным текстом
+        guard let answerText = currentUnswer.text else { return }
+        // Константа, которая определяет индекс введенного слова answerText в массиве solutions. Integer.
         if let solutionPosition = solutions.firstIndex(of: answerText){
             activatedButtons.removeAll()
             
             var splitAnswers = answersLabel.text?.components(separatedBy: "\n")
             splitAnswers?[solutionPosition] = answerText
             
+
             answersLabel.text = splitAnswers?.joined(separator: "\n")
             currentUnswer.text = ""
             score += 1
-            
+ 
             if score % 7 == 0 {
                 let ac = UIAlertController(title: "Well done!", message: "You're ready for the next level", preferredStyle: .alert)
                 
@@ -199,6 +204,10 @@ class ViewController: UIViewController {
                 present(ac, animated: true)
             }
             
+        } else {
+            let ac = UIAlertController(title: "It's wrong", message: "Entered word is wrong, please press Ok and tap letters again" , preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "Ok", style: .default, handler: clearAction))
+            present(ac, animated: true)
         }
     }
     
@@ -211,6 +220,14 @@ class ViewController: UIViewController {
             button.isHidden = false
         }
         
+    }
+    
+    func clearAction(action: UIAlertAction) {
+        currentUnswer.text = ""
+        for button in activatedButtons {
+            button.isHidden = false
+        }
+        activatedButtons.removeAll()
     }
     
     @objc func clearTapped(_ sender: UIButton){
