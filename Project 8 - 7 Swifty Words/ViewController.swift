@@ -181,6 +181,7 @@ class ViewController: UIViewController {
         
     }
 
+    
     @objc func submitTapped(_ sender: UIButton) {
         
         // Проверка что в поле с тектом currentAnswer введен какой-то текст, тогда переменная answerText будет иметь значение строки с введенным текстом
@@ -205,14 +206,23 @@ class ViewController: UIViewController {
             }
             
         } else {
-            let ac = UIAlertController(title: "It's wrong", message: "Entered word is wrong, please press Ok and tap letters again" , preferredStyle: .alert)
+            // Если игрок ввел неправильный ответ он получит сообщение
+            let ac = UIAlertController(title: "It's wrong", message: "Entered word is wrong, please press Ok and tap letters again or press Next level to choose another one. Score deducted -1" , preferredStyle: .alert)
             ac.addAction(UIAlertAction(title: "Ok", style: .default, handler: clearAction))
+            ac.addAction(UIAlertAction(title: "Next level", style: .default, handler: levelUp))
             present(ac, animated: true)
         }
+      
     }
     
     func levelUp(action: UIAlertAction) {
-        level += 1
+        currentUnswer.text = ""
+        
+        if level == 1 {
+            level += 1
+        } else {
+            level -= 1
+        }
         solutions.removeAll(keepingCapacity: true)
         loadLevel()
         
@@ -228,6 +238,7 @@ class ViewController: UIViewController {
             button.isHidden = false
         }
         activatedButtons.removeAll()
+        score -= 1
     }
     
     @objc func clearTapped(_ sender: UIButton){
