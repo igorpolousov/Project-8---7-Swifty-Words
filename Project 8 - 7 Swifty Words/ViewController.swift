@@ -10,7 +10,7 @@ import UIKit
 // Усли вы делаете интерфейс полностью при помощи кода, нужно полностью делать пометки что к чему относится чтобы в дальнейшем было понятно где какой элемент расположен на экране
 
 class ViewController: UIViewController {
-
+    
     var cluesLabel: UILabel!          // Label с подсказками слева сверху
     var answersLabel: UILabel!        // Label с введенными ответами пользователя справа сверху
     var currentUnswer: UITextField!   // Text Field с предполагаемыми ответами пользователя середина
@@ -40,8 +40,8 @@ class ViewController: UIViewController {
         scoreLabel.translatesAutoresizingMaskIntoConstraints = false
         scoreLabel.textAlignment = .right
         scoreLabel.text = "Score: 0"
-//        scoreLabel.layer.borderWidth = 1
-//        scoreLabel.layer.borderColor = UIColor.lightGray.cgColor
+        //        scoreLabel.layer.borderWidth = 1
+        //        scoreLabel.layer.borderColor = UIColor.lightGray.cgColor
         view.addSubview(scoreLabel)
         
         // Adding answerLabel to view
@@ -63,8 +63,8 @@ class ViewController: UIViewController {
         cluesLabel.text = "CLUES"
         cluesLabel.numberOfLines = 0
         cluesLabel.setContentHuggingPriority(UILayoutPriority(1), for: .vertical)
-//        cluesLabel.layer.borderWidth = 1
-//        cluesLabel.layer.borderColor = UIColor.lightGray.cgColor
+        //        cluesLabel.layer.borderWidth = 1
+        //        cluesLabel.layer.borderColor = UIColor.lightGray.cgColor
         view.addSubview(cluesLabel)
         
         // Adding currentAnswer to view
@@ -74,8 +74,8 @@ class ViewController: UIViewController {
         currentUnswer.placeholder = "Tap letters to guess"
         currentUnswer.textAlignment = .center
         currentUnswer.isUserInteractionEnabled = false
-//        currentUnswer.layer.borderWidth = 1
-//        currentUnswer.layer.borderColor = UIColor.lightGray.cgColor
+        //        currentUnswer.layer.borderWidth = 1
+        //        currentUnswer.layer.borderColor = UIColor.lightGray.cgColor
         view.addSubview(currentUnswer)
         
         // Adding submit button to view
@@ -145,7 +145,7 @@ class ViewController: UIViewController {
             buttonsView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             buttonsView.topAnchor.constraint(equalTo: submit.bottomAnchor, constant: 20),
             buttonsView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.bottomAnchor, constant: -20)
-        
+            
         ])
         
         // Заданы длина и ширина кнопки в массиве buttonsView
@@ -178,8 +178,12 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadLevel()
-       
+        
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            self?.loadLevel()
+        }
+        
+        
     }
     // Функция вызываемая при нажатии кнопки
     @objc func letterTapped(_ sender: UIButton) {
@@ -193,7 +197,7 @@ class ViewController: UIViewController {
         sender.isHidden = true
         
     }
-
+    
     // Функуия вызываемая при нажатии кнопки submit
     @objc func submitTapped(_ sender: UIButton) {
         
@@ -234,7 +238,7 @@ class ViewController: UIViewController {
             // Показли алерт
             present(ac, animated: true)
         }
-      
+        
     }
     // Делает переход на другой уровень
     func levelUp(action: UIAlertAction) {
@@ -274,12 +278,12 @@ class ViewController: UIViewController {
         activatedButtons.removeAll()
     }
     // Фукнция запускается когда загружены все view
-   @objc func loadLevel() {
-    // Строка подсказки
+    @objc func loadLevel() {
+        // Строка подсказки
         var clueString = ""
-    // Строка решения
+        // Строка решения
         var solutionString = ""
-    // Массив компонентов слов(набор букв в слове разделенных символом "|"
+        // Массив компонентов слов(набор букв в слове разделенных символом "|"
         var letterBits = [String]()
         
         // Парсинг уровня  Получение строк из файлов и добавление в массив lines
@@ -310,22 +314,30 @@ class ViewController: UIViewController {
                     // Перемешали кнопки в массиве letterButtons
                     letterButtons.shuffle()
                     // Если количество кнопок в массиве равно количествку кусков слов
-                    if letterButtons.count == letterBits.count {
-                        for i in 0..<letterButtons.count {
-                            // Для каждой кнопки с индексом i из массива кнопок установить title из массива кусков слов letterBits с индексом i
-                            letterButtons[i].setTitle(letterBits[i], for: .normal)
+                    
+                    DispatchQueue.main.async {[weak self] in
+                        if self?.letterButtons.count == letterBits.count {
+                            for i in 0..<self!.letterButtons.count {
+                                // Для каждой кнопки с индексом i из массива кнопок установить title из массива кусков слов letterBits с индексом i
+                                self?.letterButtons[i].setTitle(letterBits[i], for: .normal)
+                            }
                         }
                     }
                     
                 }
             }
         }
-        // Задаем текст для подсказок
-        cluesLabel.text = clueString.trimmingCharacters(in: .whitespacesAndNewlines)
-    // Задаем текс для ответов Это либо количество букв либо само слово  
-        answersLabel.text = solutionString.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        DispatchQueue.main.async { [weak self] in
+            // Задаем текст для подсказок
+            self?.cluesLabel.text = clueString.trimmingCharacters(in: .whitespacesAndNewlines)
+            // Задаем текс для ответов Это либо количество букв либо само слово
+            self?.answersLabel.text = solutionString.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
         
     }
+    
+   
 
 }
 
