@@ -175,7 +175,11 @@ class ViewController: UIViewController {
         
         currentUnswer.text = currentUnswer.text?.appending(buttonTtitle)
         activatedButtons.append(sender)
-        sender.isHidden = true
+        UIView.animateKeyframes(withDuration: 1, delay: 0, options: []) {
+            sender.alpha = 0
+        } completion: { finished in
+            sender.isHidden = true
+        }
         
     }
 
